@@ -31,12 +31,12 @@ class SliderPanel(wx.Panel):
             wx.SL_HORIZONTAL)
         self.slider_blue = wx.Slider(self, -1, 50, 0, 100, (50, 160), (300, 20),
             wx.SL_HORIZONTAL)
+        self.button = wx.Button(self, -1, label="open port", pos=(160, 200), size=(80, 40))
 
+        self.Bind(wx.EVT_SLIDER, self.sliderUpdate)
+        self.Bind(wx.EVT_BUTTON, self.onButton)
 
-
-        self.Bind(wx.EVT_SLIDER, self.slider_update)
-
-    def slider_update(self, event):
+    def sliderUpdate(self, event):
         self.pos_red = self.slider_red.GetValue()
         self.pos_amber = self.slider_amber.GetValue()
         self.pos_green = self.slider_green.GetValue()
@@ -48,6 +48,9 @@ class SliderPanel(wx.Panel):
                                                    self.pos_blue)
 
         frame.SetTitle(str1)
+
+    def onButton(self, event):
+        frame.SetTitle("Button was pressed")
 
 app = wx.App(True)
 frame = AppFrame("ColorControl")
