@@ -19,7 +19,6 @@ class AppFrame(wx.Frame):
     def on_close(self, event):
         self.Destroy()
 
-
 class SliderPanel(wx.Panel):
     lamp = serial.Serial()
 
@@ -40,7 +39,7 @@ class SliderPanel(wx.Panel):
         self.Bind(wx.EVT_SLIDER, self.sliderUpdate)
         self.Bind(wx.EVT_BUTTON, self.onButton)
 
-    def sliderUpdate(self, event):
+
         self.pos_red = self.slider_red.GetValue()
         self.pos_amber = self.slider_amber.GetValue()
         self.pos_green = self.slider_green.GetValue()
