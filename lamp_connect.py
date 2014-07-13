@@ -1,3 +1,7 @@
+""" 
+Script for testing connection and communication with lamp 
+"""
+
 import serial
 import time
 
@@ -27,7 +31,7 @@ if ser.isOpen():
 
                     # serial.flush() - waits until all data is written
                     ser.flush()
-                    
+
                     # cps - characters per second
                     # we cannot send characters faster than
                     # hardware can accept, we must enter a delay,
