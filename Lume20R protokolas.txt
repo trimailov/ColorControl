@@ -1,0 +1,113 @@
+LUME-20R firmware ir emuliatorius
+Mikrovaldiklis ATxmega16A4U.
+
+Solution failai:
+
+src/LumeFirmware.Avr.atsln - firmware.
+src/LumeFirmware.Win32.sln - emuliatorius.
+Šviestuvo valdymo protokolas
+Bendros savybes:
+
+Komanda prasideda dvitaškiu ir baigiasi nauja eilute (\r, \n arba \r\n).
+Komandas galima siusti kaip norima greitai.
+Komandos vykdomos tokia tvarka, kokia gaunamos.
+Atsakymas prasideda dvitaškiu ir baigiasi nauja eilute (visada \r\n).
+Nera butina laukti ar skaityti atsakymu.
+Atsakymas siunciamas kiekvienai komandai, taciau atsakymu tvarka nera apibrežta.
+Tai, kas siunciama tarp komandu, ignoruojama.
+Komandu argumentu ir atsakyme gražinamu reikšmiu formatai:
+
+Versijos numeris: V ir keturi dešimtainiai skaitmenys (pavyzdžiui V0001).
+Kanalo numeris, kanalu skaicius: du dešimtainiai skaitmenys (pavyzdžiui 04).
+Temperatura: Celsijaus laipsniai, paprastai du dešimtainiai skaitmenys (pavyzdžiui 22).
+XYZ sandai: penki dešimtainiai skaitmenys, kuriuos reikia padalinti iš 1000 (pavyzdžiui 00228).
+Kanalo šviesos srautas, PWM registro reikšme: penki dešimtainiai skaitmenys, nuo 0000 iki 9999. 9999 atitinka 100% šviesos srauta.
+Komandos
+
+Versijos gavimas
+
+Komanda: :0100\r\n
+Atsakymo pavyzdys: :0100 V0001 LUME20R_131003 ca179d5\r\n
+Atsakyme gražinama: versijos numeris, bet koks versija patikslinantis tekstas.
+
+Kanalu skaiciaus gavimas
+
+Komanda: :0101\r\n
+Atsakymo pavyzdys: :0101 04\r\n
+Atsakyme gražinama: kanalu skaicius
+
+Temperaturos gavimas
+
+Komanda: :0102\r\n
+Atsakymo pavyzdys: :0102 22\r\n
+Atsakyme gražinama: temperatura
+
+Kanalo XYZ sandu gavimas
+
+Komandos pavyzdys: :0103 01\r\n
+Komandoje nurodoma: kanalo numeris
+Atsakymo pavyzdys: :0103 01 X=24003 Y=10316 Z=00228\r\n
+Atsakyme gražinama: kanalo numeris, XYZ sandai padauginti iš 1000 (pavyzdyje X=24.003, Y=10.316, Z=0.228). Užklausus neegzistuojancio kanalo sanda gražinama klaida.
+
+Visu kanalu šviesos srautu nustatymas
+
+Komandos pavyzdys :0104 0000 1111 2222 3333\r\n
+Komandoje nurodoma: visu kanalu šviesos srautai
+Atsakymas: :0104\r\n
+
+Vieno kanalo šviesos srauto nustatymas
+
+Komandos pavyzdys: :0105 01 2345\r\n
+Komandoje nurodoma: kanalo numeris, kanalo šviesos srautas
+Atsakymo pavyzdys: :0105 01\r\n
+Atsakyme gražinama: kanalo numeris
+
+Kanalo PWM registro nuskaitymas
+
+Komandos pavyzdys: :0106 01\r\n
+Komandoje nurodoma: kanalo numeris
+Atsakymo pavyzdys: :0106 01 5194\r\n
+Atsakyme gražinama: kanalo numeris, PWM valdiklio registro reikšme (šviesos srautas, transformuotas atsižvelgiant i temperatura ir kitus faktorius)
+
+Kanalo šviesos srauto gavimas
+
+Komandos pavyzdys: :0107 01\r\n
+Komandoje nurodoma: kanalo numeris
+Atsakymo pavyzdys: :0107 01 6000\r\n
+Atsakyme gražinama: kanalo numeris, kanalui priskirtas šviesos srautas
+
+Kanalu šviesos srautu gražinimas i pradinius
+
+Komanda: `:0108\r\n'
+Atsakymas: ':0108\r\n'
+
+Kanalu pradiniu šviesos srautu pakeitimas einamaisiais
+
+Komanda: :0109\r\n'
+Atsakymas::0109\r\n'
+
+Klaidos
+
+Klaida - atsakymas i netaisyklinga komanda arba pranešimas apie nekorektiška šviestuvo ar firmware busena. Klaida prasideda :ERR ir baigiasi nauja eilute (\r\n). Klaidu pranešimu tekstas nera fiksuotas.
+Klaidos pavyzdys: :ERR Invalid command.\r\n
+
+Emuliatorius
+Programas, kurios jungiasi prie šviestuvo, galima išbandyti neturint pacio irenginio.
+
+Naudojimas, kai programa kitame irenginyje nei emuliatorius
+
+Emuliatoriui nurodomas incoming Bluetooth COM portas.
+
+Naudojimas, kai programa tame paciame irenginyje kaip ir emuliatorius
+
+Reikalinga programine iranga, emuliuojanti du sujungtus COM portus, pavyzdžiui com0com:
+
+32 bitu Windows: http://sourceforge.net/projects/com0com/files/com0com/2.2.2.0/com0com-2.2.2.0-i386-fre.zip/download
+64 bitu Windows: http://sourceforge.net/projects/com0com/files/com0com/2.2.2.0/com0com-2.2.2.0-x64-fre-signed.zip/download
+Diegimo metu pasirinkti, kad sukurtu virtualia portu pora (CNCA0 ir CNCB0). Idiegus reiketu juos pervadinti per com0com setup programa (ijungiama per Start meniu):
+command> change CNCA0 PortName=COM20
+command> change CNCB0 PortName=COM21
+
+COM portu vardai
+
+Jei COM porto numeris yra didesnis už 9, arba porto vardas neprasideda COM (pvz. CNCA0), prieš porto varda prirašykite \\.\ (pvz., \\.\CNCA0).
