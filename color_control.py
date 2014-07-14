@@ -20,6 +20,26 @@ Y (4000K < T < 25000K) = 3.081758 * X ** 3 - 5.8733867 * X ** 2 + 3.75112997 * X
 import wx
 import serial
 
+Xr = 0.44176
+Yr = 0.19107
+Zr = 0.00344
+sumR = Xr + Yr + Zr
+
+Xa = 0.44823
+Ya = 0.33499
+Za = 0.00481
+sumA = Xa + Ya + Za
+
+Xg = 0.08102
+Yg = 0.33309
+Zg = 0.07899
+sumG = Xg + Yg + Zg
+
+Xb = 0.17664
+Yb = 0.04212
+Zb = 0.929
+sumB = Xb + Yb + Zb
+
 class MainFrame(wx.Frame):
 
     ser = serial.Serial()
@@ -94,7 +114,34 @@ class MainFrame(wx.Frame):
         elif temp >= 4000 and temp < 25000:
             x = (-3.0258469e9 / (temp ** 3)) + (2.1070379e6 / (temp ** 2)) + (0.2226347e3 / temp) + 0.24039
             y = (3.081758 * (x ** 3)) - (5.8733867 * (x ** 2)) + (3.75112997 * x) - 0.37001483
-        print temp, 'K', (x, y)
+
+        kr = (x * sumR - Xr) / (Xb - x * sumB)
+        kg = (x * sumG - Xg) / (Xb - x * sumB)
+        br1 = (y * sumR - Yr) / (Yb - y * sumB) - kr
+        br2 = br1 - (y * sumG - Yg) / (Yb - y * sumB)
+        br = br1 / br2
+
+        R = 1 / (1 + br + kr + kg * br)
+        G = R * br
+        B = R * kr + G * kg
+
+        R = int(R * 10000)
+        G = int(G * 10000)
+        B = int(B * 10000)
+
+        self.sliderRed.SetValue(R)
+        self.sliderGreen.SetValue(G)
+        self.sliderBlue.SetValue(B)
+
+        string = ':0104 %s %s %s %s\r\n' % (lamp_string(R), lamp_string(G), lamp_string(B), lamp_string(0))
+
+        if self.ser.isOpen():
+            self.ser.write(string)
+            self.ser.flush()
+
+        self.txtKelvin = wx.DynamicText(self, label="%s K" % temp, pos=(200, 230))
+
+        print temp, 'K', (x, y), string
 
     def lampOn(self, event):
         self.ser = serial.Serial(port='/dev/tty.LUME20R_130426-DevB', timeout=1)
@@ -119,6 +166,7 @@ def lamp_string(number):
 
 def main():
     app = wx.App(redirect=True, filename="log.txt")
+    # app =wx.App(redirect=True)
     frame = MainFrame("ColorControl")
     frame.Show(True)
     app.MainLoop()
